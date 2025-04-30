@@ -1,5 +1,6 @@
 package com.example.myapplication2
 
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.SystemClock
@@ -12,12 +13,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.window.layout.WindowMetricsCalculator
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.random.Random
+
 
 class MainFirstActivity : AppCompatActivity() {
     private val urlString = "http://13.219.69.20:8081/todos"
@@ -94,7 +95,9 @@ class MainFirstActivity : AppCompatActivity() {
         }
 
         recordBtn.setOnClickListener{
-            FetchJsonTask(tex2).execute(urlString)
+            // Desde tu Activity actual (por ejemplo, MainActivity.kt)
+            val intent = Intent(this, RecordActivity::class.java)
+            startActivity(intent)
         }
 
     }
@@ -119,47 +122,5 @@ class MainFirstActivity : AppCompatActivity() {
         val minutes = (totalSeconds / 60) % 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d", minutes, seconds)
-    }
-}
-private class FetchJsonTask(
-    private val tvResult: TextView,
-) : AsyncTask<String, Void, String>() {
-
-    override fun onPreExecute() {
-        super.onPreExecute()
-        tvResult.text = "Cargando..."
-    }
-
-    override fun doInBackground(vararg urls: String): String {
-        val urlString = urls[0]
-        val result = StringBuilder()
-        try {
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.apply {
-                requestMethod = "GET"
-                connectTimeout = 5000
-                readTimeout = 5000
-            }
-
-            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader(InputStreamReader(connection.inputStream)).use { reader ->
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        result.append(line)
-                    }
-                }
-            } else {
-                return "Error: ${connection.responseCode}"
-            }
-        } catch (e: Exception) {
-            return "Excepción: ${e.message}"
-        }
-        return result.toString()
-    }
-
-    override fun onPostExecute(result: String) {
-        super.onPostExecute(result)
-        tvResult.text = result
     }
 }
